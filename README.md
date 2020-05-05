@@ -1,15 +1,17 @@
-## hooman [![Build Status](https://travis-ci.org/sayem314/hooman.svg?branch=master)](https://travis-ci.org/sayem314/hooman)
+## hooman ![Build Status](https://img.shields.io/travis/sayem314/hooman.svg?style=flat-square&label=daily+builds)
 
 An http interceptor using got to bypass cloudflare ddos protection on nodejs.
 
-![](screenshot.png)
+![](https://github.com/sayem314/hooman/raw/master/screenshot.png)
 
 ## Install
 
 ```shell
-# with npm: npm i hooman
-yarn add hooman
+# with npm: npm i hooman got
+yarn add hooman got
 ```
+
+> got is peer-dependencies
 
 ## Usage
 
