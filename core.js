@@ -1,5 +1,6 @@
 "use strict";
 const { JSDOM } = require("jsdom");
+const { NodeVM } = require("vm2");
 
 // Sleep/delay function
 const sleep = ms => {
@@ -18,19 +19,30 @@ const solve = async (url, html) => {
   let jschl_answer = document.getElementsByTagName("script")[0].textContent;
   jschl_answer = jschl_answer.substring(jschl_answer.indexOf("var s"));
   jschl_answer = jschl_answer.substring(0, jschl_answer.indexOf("f.submit"));
-  jschl_answer = jschl_answer
-    .replace("location.", "document.location.")
-    .replace("var ", "let ");
-
-  // Execute script and assign answer to input
-  eval(jschl_answer);
+  jschl_answer = jschl_answer.replace("location.", "document.location.");
 
   // Retrive answers from form to submit challenge
-  const input = document.getElementsByTagName("input");
   const body = [];
-  for (const i of input) {
-    body.push(i.name + "=" + encodeURIComponent(i.value));
-  }
+  const vm = new NodeVM({
+    sandbox: { body },
+    require: {
+      mock: {
+        JSDOM: {
+          content() {
+            return document;
+          }
+        }
+      }
+    }
+  });
+  vm.run(`const JSDOM = require('JSDOM');
+    const document = JSDOM.content();
+    ${jschl_answer}
+    // Retrive answers from form to submit challenge
+    const input = document.getElementsByTagName("input");
+    for (const i of input) {
+      body.push(i.name + "=" + encodeURIComponent(i.value));
+    }`);
 
   // Parse request information
   const { method, action, enctype } = document.getElementById("challenge-form");
