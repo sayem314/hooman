@@ -23,21 +23,8 @@ const solve = async (url, html) => {
 
   // Retrive answers from form to submit challenge
   const body = [];
-  const vm = new NodeVM({
-    sandbox: { body },
-    require: {
-      mock: {
-        JSDOM: {
-          content() {
-            return document;
-          }
-        }
-      }
-    }
-  });
-  vm.run(`const JSDOM = require('JSDOM');
-    const document = JSDOM.content();
-    ${jschl_answer}
+  const vm = new NodeVM({ sandbox: { document, body } });
+  await vm.run(`${jschl_answer}
     // Retrive answers from form to submit challenge
     const input = document.getElementsByTagName("input");
     for (const i of input) {
