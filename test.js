@@ -38,10 +38,9 @@ test("real world test #2", async t => {
 // Test image download
 test("sample image download", async t => {
   console.time("image download");
-  const { body } = await scrape(
-    "https://c.pxhere.com/images/11/49/74e4a31de6abe70227fa1cb22d37-1612083.jpg!d",
-    { responseType: "buffer" }
-  );
+  const { body } = await scrape(jsChallengePage + "/images/background.jpg", {
+    responseType: "buffer"
+  });
   console.timeEnd("image download");
 
   // Write to file
@@ -50,5 +49,5 @@ test("sample image download", async t => {
 
   // Check image size
   const { size } = statSync("image.jpg");
-  t.equal(size, 132084);
+  t.equal(size, 31001);
 });
