@@ -39,3 +39,5 @@ jspm_packages
 # Debug files
 cf.*
 *.html
+*.jpg
+*.png

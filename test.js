@@ -1,5 +1,6 @@
 const test = require("tape");
 const scrape = require(".");
+const { writeFileSync, statSync } = require("fs");
 
 const jsChallengePage = "https://cf-js-challenge.sayem.eu.org";
 
@@ -32,4 +33,22 @@ test("real world test #2", async t => {
   // If served from cache, fail test
   t.notOk(response.isFromCache);
   t.ok(response.body.includes("sayem314"));
+});
+
+// Test image download
+test("sample image download", async t => {
+  console.time("image download");
+  const { body } = await scrape(
+    "https://c.pxhere.com/images/11/49/74e4a31de6abe70227fa1cb22d37-1612083.jpg!d",
+    { responseType: "buffer" }
+  );
+  console.timeEnd("image download");
+
+  // Write to file
+  t.ok(Buffer.isBuffer(body));
+  writeFileSync("image.jpg", body);
+
+  // Check image size
+  const { size } = statSync("image.jpg");
+  t.equal(size, 132084);
 });
