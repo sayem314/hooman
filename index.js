@@ -11,7 +11,7 @@ const instance = got.extend({
     limit: 2,
     statusCodes: [408, 413, 429, 500, 502, 504, 521, 522, 524]
   }, // Do not retry 503, we will handle it
-  cloudflareRetry: 0, // Prevent cloudflare loop
+  cloudflareRetry: 5, // Prevent cloudflare loop
   notFoundRetry: 0, // Handle redirect issue
   http2: true, // Use recommended protocol
   headers: {
@@ -36,9 +36,9 @@ const instance = got.extend({
           response.body.includes("jschl-answer")
         ) {
           // Solve js challange
-          if (response.request.options.cloudflareRetry < 5) {
+          if (response.request.options.cloudflareRetry > 0) {
             const data = await solve(response.url, response.body);
-            response.request.options.cloudflareRetry++;
+            response.request.options.cloudflareRetry--;
             return instance({ ...response.request.options, ...data });
           }
         } else if (
