@@ -27,4 +27,12 @@ got("https://sayem.eu.org")
   });
 ```
 
-All methods and props of [got](https://github.com/sindresorhus/got) should work fine.
+###### All methods and props of [got](https://github.com/sindresorhus/got) should work fine.
+
+> Note that hooman cannot solve captcha (error code 403) yet.
+
+## Donations
+
+If you want to show your appreciation, you can donate me [here](https://sayem.eu.org/donate). Thanks!
+
+> Made with :heart: & :coffee: by Sayem
