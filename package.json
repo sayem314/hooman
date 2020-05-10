@@ -8,6 +8,9 @@
     "pretest": "eslint .",
     "test": "tape test.js"
   },
+  "engines": {
+    "node": ">=10.19.0"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sayem314/hooman.git"
