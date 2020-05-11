@@ -67,7 +67,19 @@ console.log(response.body);
 
 > All you need to do is provide `captchaKey` and rest is done by hooman. It automatically detects if g/hCaptcha is present and need solving or can be solved. There are console.log print on hit as well.
 
-![Test Results](https://github.com/sayem314/hooman/raw/master/captcha-test.png)
+###### Proxy
+
+```js
+const HttpsProxyAgent = require('https-proxy-agent');
+
+const proxy = new HttpsProxyAgent('http://127.0.0.1:3128');
+
+const response = await hooman('https://sayem.eu.org', {
+  agent: {
+    https: proxy,
+  },
+});
+```
 
 #### API
 
