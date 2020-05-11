@@ -14,7 +14,8 @@ const instance = got.extend({
     statusCodes: [408, 413, 429, 500, 502, 504, 521, 522, 524],
   }, // Do not retry 503, we will handle it
   cloudflareRetry: 5, // Prevent cloudflare loop
-  notFoundRetry: 0, // Handle redirect issue
+  notFoundRetry: 1, // Handle redirect issue
+  captchaRetry: 1,
   captchaKey: null,
   http2: true, // Use recommended protocol
   headers: {
@@ -48,21 +49,20 @@ const instance = got.extend({
           // Handle redirect issue for cloudflare
           response.statusCode === 404 &&
           response.headers.server === 'cloudflare' &&
+          response.request.options.notFoundRetry > 0 &&
           response.url.includes('?__cf_chl_jschl_tk')
         ) {
           // Do not retry again
-          if (response.request.options.notFoundRetry === 0) {
-            return instance({
-              url: response.url.split('?__cf_chl_jschl_tk')[0],
-              notFoundRetry: response.request.options.notFoundRetry + 1,
-            });
-          }
+          return instance({
+            url: response.url.split('?__cf_chl_jschl_tk')[0],
+            notFoundRetry: response.request.options.notFoundRetry - 1,
+          });
         } else if (
           response.statusCode === 403 &&
           response.headers.server === 'cloudflare' &&
           response.request.options.captchaKey &&
-          response.body.includes('cf_captcha_kind') &&
-          response.request.options.notFoundRetry === 0
+          response.request.options.captchaRetry > 0 &&
+          response.body.includes('cf_captcha_kind')
         ) {
           // Solve hCaptcha
           // Find captcha kind and site-key
@@ -96,7 +96,7 @@ const instance = got.extend({
                   'content-type': enctype, // application/x-www-form-urlencoded
                 },
                 body: body.join('&'),
-                notFoundRetry: response.request.options.notFoundRetry + 1,
+                captchaRetry: response.request.options.captchaRetry - 1,
               });
             }
           }
