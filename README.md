@@ -18,11 +18,11 @@ yarn add hooman got
 ###### GET HTML
 
 ```js
-const hooman = require("hooman");
+const hooman = require('hooman');
 
 (async () => {
   try {
-    const response = await hooman.get("https://sayem.eu.org");
+    const response = await hooman.get('https://sayem.eu.org');
     console.log(response.body);
     //=> '<!doctype html> ...'
   } catch (error) {
@@ -35,11 +35,11 @@ const hooman = require("hooman");
 ###### POST JSON
 
 ```js
-const { body } = await hooman.post("https://httpbin.org/anything", {
+const { body } = await hooman.post('https://httpbin.org/anything', {
   json: {
-    hello: "world"
+    hello: 'world',
   },
-  responseType: "json"
+  responseType: 'json',
 });
 console.log(body.data);
 //=> {hello: 'world'}
@@ -52,7 +52,7 @@ console.log(body.data);
 await hooman(jsChallengePage);
 
 // Now we can download files
-const image = fs.createWriteStream("image.jpg");
+const image = fs.createWriteStream('image.jpg');
 hooman.stream(imageUrl).pipe(image);
 ```
 

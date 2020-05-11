@@ -6,7 +6,7 @@
 ```js
 // Example
 const { body } = await got(url, {
-  cloudflareRetry: 8 // default 5
+  cloudflareRetry: 8, // default 5
 });
 ```
 

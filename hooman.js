@@ -1,42 +1,42 @@
-"use strict";
-const got = require("got");
-const solve = require("./lib/core");
-const UserAgent = require("user-agents");
-const captcha = require("./lib/2captcha");
-const { CookieJar } = require("tough-cookie");
-const { JSDOM } = require("jsdom");
+'use strict';
+const got = require('got');
+const solve = require('./lib/core');
+const UserAgent = require('user-agents');
+const captcha = require('./lib/2captcha');
+const { CookieJar } = require('tough-cookie');
+const { JSDOM } = require('jsdom');
 
 // Got instance to handle cloudflare bypass
 const instance = got.extend({
   cookieJar: new CookieJar(), // Automatically parse and store cookies
   retry: {
     limit: 2,
-    statusCodes: [408, 413, 429, 500, 502, 504, 521, 522, 524]
+    statusCodes: [408, 413, 429, 500, 502, 504, 521, 522, 524],
   }, // Do not retry 503, we will handle it
   cloudflareRetry: 5, // Prevent cloudflare loop
   notFoundRetry: 0, // Handle redirect issue
   captchaKey: null,
   http2: true, // Use recommended protocol
   headers: {
-    "cache-control": "max-age=0",
-    "upgrade-insecure-requests": "1",
-    "user-agent": new UserAgent().toString() // Use random user agent between sessions
+    'cache-control': 'max-age=0',
+    'upgrade-insecure-requests': '1',
+    'user-agent': new UserAgent().toString(), // Use random user agent between sessions
   }, // Mimic browser environment
   hooks: {
     beforeRequest: [
-      options => {
+      (options) => {
         // Add required headers to mimic browser environment
         options.headers.origin = options.url.origin;
         options.headers.referer = options.url.href;
-      }
+      },
     ],
     afterResponse: [
-      async response => {
+      async (response) => {
         if (
           // If site is not hosted on cloudflare skip
           response.statusCode === 503 &&
-          response.headers.server === "cloudflare" &&
-          response.body.includes("jschl-answer")
+          response.headers.server === 'cloudflare' &&
+          response.body.includes('jschl-answer')
         ) {
           // Solve js challange
           if (response.request.options.cloudflareRetry > 0) {
@@ -47,71 +47,66 @@ const instance = got.extend({
         } else if (
           // Handle redirect issue for cloudflare
           response.statusCode === 404 &&
-          response.headers.server === "cloudflare" &&
-          response.url.includes("?__cf_chl_jschl_tk")
+          response.headers.server === 'cloudflare' &&
+          response.url.includes('?__cf_chl_jschl_tk')
         ) {
           // Do not retry again
           if (response.request.options.notFoundRetry === 0) {
             return instance({
-              url: response.url.split("?__cf_chl_jschl_tk")[0],
-              notFoundRetry: response.request.options.notFoundRetry + 1
+              url: response.url.split('?__cf_chl_jschl_tk')[0],
+              notFoundRetry: response.request.options.notFoundRetry + 1,
             });
           }
         } else if (
           response.statusCode === 403 &&
-          response.headers.server === "cloudflare" &&
+          response.headers.server === 'cloudflare' &&
           response.request.options.captchaKey &&
-          response.body.includes("cf_captcha_kind") &&
+          response.body.includes('cf_captcha_kind') &&
           response.request.options.notFoundRetry === 0
         ) {
           // Solve hCaptcha
           // Find captcha kind and site-key
-          // prettier-ignore
           const sitekey = response.body.match(/\sdata-sitekey=["']?([^\s"'<>&]+)/);
           if (sitekey) {
-            // prettier-ignore
-            const {document} = new JSDOM(response.body).window
-            const input = document.getElementsByTagName("input");
+            const { document } = new JSDOM(response.body).window;
+            const input = document.getElementsByTagName('input');
             const body = [];
             for (const i of input) {
-              body.push(i.name + "=" + encodeURIComponent(i.value));
+              body.push(i.name + '=' + encodeURIComponent(i.value));
             }
-            const captchaMethod = body.find(i => i.includes("cf_captcha_kind"));
+            const captchaMethod = body.find((i) => i.includes('cf_captcha_kind'));
             if (captchaMethod) {
               const captchaResponse = await captcha.solve({
                 key: response.request.options.captchaKey,
                 pageurl: response.url,
                 sitekey: sitekey[1],
-                method: captchaMethod.split("=")[1] + "captcha"
+                method: captchaMethod.split('=')[1] + 'captcha',
               });
-              body.push("g-captcha-response=" + captchaResponse);
-              if (captchaMethod === "cf_captcha_kind=h") {
-                body.push("h-captcha-response=" + captchaResponse);
+              body.push('g-captcha-response=' + captchaResponse);
+              if (captchaMethod === 'cf_captcha_kind=h') {
+                body.push('h-captcha-response=' + captchaResponse);
               }
 
-              // prettier-ignore
-              const baseUrl = response.url.substring(0, response.url.lastIndexOf('/'))
-              const { method, action, enctype } = document.getElementById(
-                "challenge-form"
-              );
+              const baseUrl = response.url.substring(0, response.url.lastIndexOf('/'));
+              const { method, action, enctype } = document.getElementById('challenge-form');
               return instance({
                 method,
-                url: action.startsWith("/") ? baseUrl + action : action,
+                url: action.startsWith('/') ? baseUrl + action : action,
                 headers: {
-                  "content-type": enctype // application/x-www-form-urlencoded
+                  'content-type': enctype, // application/x-www-form-urlencoded
                 },
-                body: body.join("&"),
-                notFoundRetry: response.request.options.notFoundRetry + 1
+                body: body.join('&'),
+                notFoundRetry: response.request.options.notFoundRetry + 1,
               });
             }
           }
         }
 
         return response;
-      }
-    ]
+      },
+    ],
   },
-  mutableDefaults: true // Defines if config can be changed later
+  mutableDefaults: true, // Defines if config can be changed later
 });
 
 module.exports = instance;
