@@ -1,8 +1,9 @@
 "use strict";
 const got = require("got");
 const solve = require("./lib/core");
-const { CookieJar } = require("tough-cookie");
 const UserAgent = require("user-agents");
+const { CookieJar } = require("tough-cookie");
+const { JSDOM } = require("jsdom");
 
 // Got instance to handle cloudflare bypass
 const instance = got.extend({
@@ -13,6 +14,7 @@ const instance = got.extend({
   }, // Do not retry 503, we will handle it
   cloudflareRetry: 5, // Prevent cloudflare loop
   notFoundRetry: 0, // Handle redirect issue
+  captchaKey: null,
   http2: true, // Use recommended protocol
   headers: {
     "cache-control": "max-age=0",
@@ -57,10 +59,25 @@ const instance = got.extend({
         } else if (
           response.statusCode === 403 &&
           response.headers.server === "cloudflare" &&
+          response.request.options.captchaKey &&
           response.body.includes("cf_captcha_kind")
         ) {
           // Solve hCaptcha
-          // TODO:
+          // Find captcha kind and site-key
+          // prettier-ignore
+          const sitekey = response.body.match(/\sdata-sitekey=["']?([^\s"'<>&]+)/);
+          if (sitekey) {
+            // prettier-ignore
+            const input = new JSDOM(response.body).window.document.getElementsByTagName("input");
+            const body = [];
+            for (const i of input) {
+              body.push(i.name + "=" + encodeURIComponent(i.value));
+            }
+            const captchaMethod = body.find(i => i.includes("cf_captcha_kind"));
+            if (captchaMethod) {
+              // TODO:
+            }
+          }
         }
 
         return response;
