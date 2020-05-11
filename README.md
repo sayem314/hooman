@@ -1,6 +1,6 @@
 ## hooman ![Build Status](https://img.shields.io/travis/sayem314/hooman.svg?style=flat-square&label=daily+builds)
 
-An http interceptor using got to bypass cloudflare ddos protection on nodejs.
+HTTP interceptor using got to bypass Cloudflare DDOS protection / JavaScript challenge on Node.js
 
 ![](https://github.com/sayem314/hooman/raw/master/screenshot.png)
 
@@ -13,7 +13,9 @@ yarn add hooman got
 
 > got is peer-dependencies
 
-## Usage
+## Usage Example
+
+###### GET HTML
 
 ```js
 const hooman = require("hooman");
@@ -30,6 +32,8 @@ const hooman = require("hooman");
 })();
 ```
 
+###### POST JSON
+
 ```js
 const { body } = await hooman.post("https://httpbin.org/anything", {
   json: {
@@ -41,9 +45,24 @@ console.log(body.data);
 //=> {hello: 'world'}
 ```
 
-###### All methods and props of [got](https://github.com/sindresorhus/got) should work fine.
+###### Pipe Stream
 
-> Note that hooman cannot solve captcha (error code 403) yet.
+```js
+// This is mandatory to set cookie first since .stream() doesn't fire hooks
+await hooman(jsChallengePage);
+
+// Now we can download files
+const image = fs.createWriteStream("image.jpg");
+hooman.stream(imageUrl).pipe(image);
+```
+
+#### API
+
+Please see available [API here](https://github.com/sindresorhus/got/blob/master/readme.md#api).
+
+> All methods and props of [got](https://github.com/sindresorhus/got) should work fine.
+
+> > Note that hooman cannot solve captcha (Error Code 403) yet!
 
 ## Donations
 
