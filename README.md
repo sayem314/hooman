@@ -65,6 +65,8 @@ const response = await hooman.get('https://sayem.eu.org', {
 console.log(response.body);
 ```
 
+![](https://github.com/sayem314/hooman/raw/master/captcha-test.png)
+
 #### API
 
 Please see available [API here](https://github.com/sindresorhus/got/blob/master/readme.md#api).
