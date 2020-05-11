@@ -56,7 +56,7 @@ const image = fs.createWriteStream('image.jpg');
 hooman.stream(imageUrl).pipe(image);
 ```
 
-###### hCaptcha
+###### Captcha
 
 ```js
 const response = await hooman.get('https://sayem.eu.org', {
@@ -65,7 +65,9 @@ const response = await hooman.get('https://sayem.eu.org', {
 console.log(response.body);
 ```
 
-![](https://github.com/sayem314/hooman/raw/master/captcha-test.png)
+> All you need to do is provide `captchaKey` and rest is done by hooman. It automatically detects if g/hCaptcha is present and need solving or can be solved. There are console.log print on hit as well.
+
+![Test Results](https://github.com/sayem314/hooman/raw/master/captcha-test.png)
 
 #### API
 
