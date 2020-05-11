@@ -54,6 +54,13 @@ const instance = got.extend({
               notFoundRetry: response.request.options.notFoundRetry + 1
             });
           }
+        } else if (
+          response.statusCode === 403 &&
+          response.headers.server === "cloudflare" &&
+          response.body.includes("cf_captcha_kind")
+        ) {
+          // Solve hCaptcha
+          // TODO:
         }
 
         return response;
