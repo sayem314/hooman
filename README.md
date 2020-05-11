@@ -56,6 +56,15 @@ const image = fs.createWriteStream('image.jpg');
 hooman.stream(imageUrl).pipe(image);
 ```
 
+###### hCaptcha
+
+```js
+const response = await hooman.get('https://sayem.eu.org', {
+  captchaKey: '2captcha_api_key',
+});
+console.log(response.body);
+```
+
 #### API
 
 Please see available [API here](https://github.com/sindresorhus/got/blob/master/readme.md#api).
@@ -64,8 +73,8 @@ Please see available [API here](https://github.com/sindresorhus/got/blob/master/
 
 > > Note that hooman cannot solve captcha (Error Code 403) yet!
 
-## Donations
+## Support
 
-If you want to show your appreciation, you can donate me [here](https://sayem.eu.org/donate). Thanks!
+I don't make any profit with this library. If you want to show your appreciation, you can donate me [here](https://sayem.eu.org/donate) :scream_cat: Thanks! You can also hire me for scraping solution, ping me and we will discuss further :smile:
 
 > Made with :heart: & :coffee: by Sayem
