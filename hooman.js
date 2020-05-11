@@ -1,10 +1,9 @@
 'use strict';
 const got = require('got');
-const solve = require('./lib/core');
-const UserAgent = require('user-agents');
-const captcha = require('./lib/2captcha');
+const solveChallenge = require('./lib/core');
+const solveCaptcha = require('./lib/captcha');
 const { CookieJar } = require('tough-cookie');
-const { JSDOM } = require('jsdom');
+const UserAgent = require('user-agents');
 
 // Got instance to handle cloudflare bypass
 const instance = got.extend({
@@ -41,7 +40,7 @@ const instance = got.extend({
           response.body.includes('jschl-answer')
         ) {
           // Solve js challange
-          const data = await solve(response.url, response.body);
+          const data = await solveChallenge(response.url, response.body);
           response.request.options.cloudflareRetry--;
           return instance({ ...response.request.options, ...data });
         } else if (
@@ -64,39 +63,12 @@ const instance = got.extend({
           response.body.includes('cf_captcha_kind')
         ) {
           // Solve g/hCaptcha
-          const sitekey = response.body.match(/\sdata-sitekey=["']?([^\s"'<>&]+)/);
-          if (sitekey) {
-            const { document } = new JSDOM(response.body).window;
-            const input = document.getElementsByTagName('input');
-            const body = [];
-            for (const i of input) {
-              body.push(i.name + '=' + encodeURIComponent(i.value));
-            }
-            const captchaMethod = body.find((i) => i.includes('cf_captcha_kind'));
-            if (captchaMethod) {
-              const captchaResponse = await captcha.solve({
-                key: response.request.options.captchaKey,
-                pageurl: response.url,
-                sitekey: sitekey[1],
-                method: captchaMethod.split('=')[1] + 'captcha',
-              });
-              body.push('g-captcha-response=' + captchaResponse);
-              if (captchaMethod === 'cf_captcha_kind=h') {
-                body.push('h-captcha-response=' + captchaResponse);
-              }
-
-              const baseUrl = response.url.substring(0, response.url.lastIndexOf('/'));
-              const { method, action, enctype } = document.getElementById('challenge-form');
-              return instance({
-                method,
-                url: action.startsWith('/') ? baseUrl + action : action,
-                headers: {
-                  'content-type': enctype, // application/x-www-form-urlencoded
-                },
-                body: body.join('&'),
-                captchaRetry: response.request.options.captchaRetry - 1,
-              });
-            }
+          const captchaData = await solveCaptcha(response);
+          if (captchaData) {
+            return instance({
+              ...captchaData,
+              captchaRetry: response.request.options.captchaRetry - 1,
+            });
           }
         }
 
