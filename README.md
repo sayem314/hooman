@@ -16,15 +16,29 @@ yarn add hooman got
 ## Usage
 
 ```js
-const got = require("hooman");
+const hooman = require("hooman");
 
-got("https://sayem.eu.org")
-  .then(response => {
+(async () => {
+  try {
+    const response = await hooman.get("https://sayem.eu.org");
     console.log(response.body);
-  })
-  .catch(error => {
-    console.error(error);
-  });
+    //=> '<!doctype html> ...'
+  } catch (error) {
+    console.log(error.response.body);
+    //=> 'Internal server error ...'
+  }
+})();
+```
+
+```js
+const { body } = await hooman.post("https://httpbin.org/anything", {
+  json: {
+    hello: "world"
+  },
+  responseType: "json"
+});
+console.log(body.data);
+//=> {hello: 'world'}
 ```
 
 ###### All methods and props of [got](https://github.com/sindresorhus/got) should work fine.
