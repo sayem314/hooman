@@ -2,6 +2,7 @@
 const got = require("got");
 const solve = require("./lib/core");
 const UserAgent = require("user-agents");
+const captcha = require("./lib/2captcha");
 const { CookieJar } = require("tough-cookie");
 const { JSDOM } = require("jsdom");
 
@@ -75,7 +76,13 @@ const instance = got.extend({
             }
             const captchaMethod = body.find(i => i.includes("cf_captcha_kind"));
             if (captchaMethod) {
-              // TODO:
+              // const captchaResponse = await captcha.solve({
+              //   key: response.request.options.captchaKey,
+              //   pageurl: response.url,
+              //   sitekey: sitekey[1],
+              //   method: captchaMethod.split("=")[1] + "captcha"
+              // });
+              // console.log(captchaResponse);
             }
           }
         }
