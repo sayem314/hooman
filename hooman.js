@@ -37,14 +37,13 @@ const instance = got.extend({
           // If site is not hosted on cloudflare skip
           response.statusCode === 503 &&
           response.headers.server === 'cloudflare' &&
+          response.request.options.cloudflareRetry > 0 &&
           response.body.includes('jschl-answer')
         ) {
           // Solve js challange
-          if (response.request.options.cloudflareRetry > 0) {
-            const data = await solve(response.url, response.body);
-            response.request.options.cloudflareRetry--;
-            return instance({ ...response.request.options, ...data });
-          }
+          const data = await solve(response.url, response.body);
+          response.request.options.cloudflareRetry--;
+          return instance({ ...response.request.options, ...data });
         } else if (
           // Handle redirect issue for cloudflare
           response.statusCode === 404 &&
@@ -64,8 +63,7 @@ const instance = got.extend({
           response.request.options.captchaRetry > 0 &&
           response.body.includes('cf_captcha_kind')
         ) {
-          // Solve hCaptcha
-          // Find captcha kind and site-key
+          // Solve g/hCaptcha
           const sitekey = response.body.match(/\sdata-sitekey=["']?([^\s"'<>&]+)/);
           if (sitekey) {
             const { document } = new JSDOM(response.body).window;
