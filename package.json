@@ -2,7 +2,7 @@
   "name": "hooman",
   "version": "1.1.1",
   "description": "http interceptor to hoomanize cloudflare requests",
-  "main": "index.js",
+  "main": "hooman.js",
   "scripts": {
     "lint": "eslint .",
     "pretest": "eslint .",

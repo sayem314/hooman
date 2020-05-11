@@ -1,6 +1,6 @@
 "use strict";
 const got = require("got");
-const solve = require("./core");
+const solve = require("./lib/core");
 const { CookieJar } = require("tough-cookie");
 const UserAgent = require("user-agents");
 
