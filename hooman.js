@@ -61,7 +61,8 @@ const instance = got.extend({
           response.statusCode === 403 &&
           response.headers.server === "cloudflare" &&
           response.request.options.captchaKey &&
-          response.body.includes("cf_captcha_kind")
+          response.body.includes("cf_captcha_kind") &&
+          response.request.options.notFoundRetry === 0
         ) {
           // Solve hCaptcha
           // Find captcha kind and site-key
@@ -69,20 +70,39 @@ const instance = got.extend({
           const sitekey = response.body.match(/\sdata-sitekey=["']?([^\s"'<>&]+)/);
           if (sitekey) {
             // prettier-ignore
-            const input = new JSDOM(response.body).window.document.getElementsByTagName("input");
+            const {document} = new JSDOM(response.body).window
+            const input = document.getElementsByTagName("input");
             const body = [];
             for (const i of input) {
               body.push(i.name + "=" + encodeURIComponent(i.value));
             }
             const captchaMethod = body.find(i => i.includes("cf_captcha_kind"));
             if (captchaMethod) {
-              // const captchaResponse = await captcha.solve({
-              //   key: response.request.options.captchaKey,
-              //   pageurl: response.url,
-              //   sitekey: sitekey[1],
-              //   method: captchaMethod.split("=")[1] + "captcha"
-              // });
-              // console.log(captchaResponse);
+              const captchaResponse = await captcha.solve({
+                key: response.request.options.captchaKey,
+                pageurl: response.url,
+                sitekey: sitekey[1],
+                method: captchaMethod.split("=")[1] + "captcha"
+              });
+              body.push("g-captcha-response=" + captchaResponse);
+              if (captchaMethod === "cf_captcha_kind=h") {
+                body.push("h-captcha-response=" + captchaResponse);
+              }
+
+              // prettier-ignore
+              const baseUrl = response.url.substring(0, response.url.lastIndexOf('/'))
+              const { method, action, enctype } = document.getElementById(
+                "challenge-form"
+              );
+              return instance({
+                method,
+                url: action.startsWith("/") ? baseUrl + action : action,
+                headers: {
+                  "content-type": enctype // application/x-www-form-urlencoded
+                },
+                body: body.join("&"),
+                notFoundRetry: response.request.options.notFoundRetry + 1
+              });
             }
           }
         }
