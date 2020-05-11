@@ -71,8 +71,6 @@ Please see available [API here](https://github.com/sindresorhus/got/blob/master/
 
 > All methods and props of [got](https://github.com/sindresorhus/got) should work fine.
 
-> > Note that hooman cannot solve captcha (Error Code 403) yet!
-
 ## Support
 
 I don't make any profit with this library. If you want to show your appreciation, you can donate me [here](https://sayem.eu.org/donate) :scream_cat: Thanks! You can also hire me for scraping solution, ping me and we will discuss further :smile:
