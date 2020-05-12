@@ -1,6 +1,6 @@
 {
   "name": "hooman",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "http interceptor to hoomanize cloudflare requests",
   "main": "hooman.js",
   "scripts": {

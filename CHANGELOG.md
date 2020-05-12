@@ -1,3 +1,10 @@
+### v1.2.1
+
+- Fixed #9
+- Fixed proxy issue #10
+- Added support for rucaptcha
+- Refactored captcha code
+
 ### v1.2.0
 
 - Refactored code
