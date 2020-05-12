@@ -1,12 +1,13 @@
 ---
-name: "🐞 Bug report"
+name: '🐞 Bug report'
 about: Something is not working as expected
 ---
 
 #### Describe the bug
 
- - Node.js version: 
- - OS & version: 
+- Hooman version:
+- Node.js version:
+- OS & version:
 
 <!-- A clear and concise description of what the bug is. -->
 
