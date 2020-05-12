@@ -60,7 +60,8 @@ hooman.stream(imageUrl).pipe(image);
 
 ```js
 const response = await hooman.get('https://sayem.eu.org', {
-  captchaKey: '2captcha_api_key',
+  captchaKey: '2captcha_or_rucaptcha_api_key',
+  rucaptcha: true | false, // optional (default false)
 });
 console.log(response.body);
 ```

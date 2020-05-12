@@ -19,6 +19,7 @@ const instance = got.extend({
   notFoundRetry: 1, // Handle redirect issue
   captchaRetry: 1,
   captchaKey: null,
+  rucaptcha: false,
   http2: false, // http2 doesn't work well with proxies
   headers: {
     'accept-encoding': 'gzip, deflate',
