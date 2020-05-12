@@ -67,6 +67,8 @@ console.log(response.body);
 
 > All you need to do is provide `captchaKey` and rest is done by hooman. It automatically detects if g/hCaptcha is present and need solving or can be solved. There are console.log print on hit as well.
 
+> Note that if you make multiple request at once only the first request will be served without error. This is so that you don't end up paying extra for captcha solving. If you would like to fetch more than one request at a time, first solve captcha and then make rest of your request after cookie is set.
+
 ###### Proxy
 
 ```js
