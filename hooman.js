@@ -69,16 +69,19 @@ const instance = got.extend({
           response.body.includes('cf_captcha_kind')
         ) {
           // Solve g/hCaptcha
+          // If there are captcha solving in progress for current domain do not request for solving
           if (!challengeInProgress[response.url.host]) {
             challengeInProgress[response.url.host] = true;
-            const captchaData = await solveCaptcha(response);
+            const captchaData = await solveCaptcha(response).finally(() => {
+              delete challengeInProgress[response.url.host];
+            });
+
+            // Submit captcha data
             if (captchaData) {
               return instance({
                 ...captchaData,
                 captchaRetry: response.request.options.captchaRetry - 1,
                 ignoreInProgress: true,
-              }).finally(() => {
-                delete challengeInProgress[response.url.host];
               });
             }
           }

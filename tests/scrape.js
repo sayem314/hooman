@@ -16,7 +16,7 @@ const fetchHtml = async () => {
 
 describe('- real world test', () => {
   // solve challenge within 20 seconds
-  it('should return html', fetchHtml).timeout(1000 * 20);
+  it('should return html', fetchHtml).timeout(1000 * 30);
 
   // should fetch within 4 seconds
   it('should respect cookies', fetchHtml).timeout(1000 * 4);
