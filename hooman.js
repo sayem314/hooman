@@ -2,12 +2,16 @@
 const got = require('got');
 const solveChallenge = require('./lib/core');
 const solveCaptcha = require('./lib/captcha');
+const delay = require('./lib/delay');
 const { CookieJar } = require('tough-cookie');
 const UserAgent = require('user-agents');
 
+const cookieJar = new CookieJar(); // Automatically parse and store cookies
+const captchaInProgress = {};
+
 // Got instance to handle cloudflare bypass
 const instance = got.extend({
-  cookieJar: new CookieJar(), // Automatically parse and store cookies
+  cookieJar,
   retry: {
     limit: 2,
     statusCodes: [408, 413, 429, 500, 502, 504, 521, 522, 524],
@@ -63,13 +67,25 @@ const instance = got.extend({
           response.body.includes('cf_captcha_kind')
         ) {
           // Solve g/hCaptcha
+          if (captchaInProgress[response.url.host]) {
+            while (captchaInProgress[response.url.host]) {
+              // console.log(`Waiting for captcha to be solved for ${response.url.host}`);
+              await delay(1000);
+            }
+            return instance({ ...response.request.options, cookieJar });
+          }
+
+          captchaInProgress[response.url.host] = true;
           const captchaData = await solveCaptcha(response);
           if (captchaData) {
             return instance({
               ...captchaData,
               captchaRetry: response.request.options.captchaRetry - 1,
+            }).finally(() => {
+              delete captchaInProgress[response.url.host];
             });
           }
+          delete captchaInProgress[response.url.host];
         }
 
         return response;
