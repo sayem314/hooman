@@ -43,6 +43,6 @@ describe('- real world test', () => {
       assert.equal(typeof response.body, 'string');
       assert.equal(response.isFromCache, false);
       assert(response.body.includes('sayem314'));
-    }).timeout(1000 * 60);
+    }).timeout(1000 * 200); // 3 min and 20 sec
   }
 });
