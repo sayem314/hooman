@@ -1,4 +1,4 @@
-name: JS-Challange
+name: JS-Challenge
 
 on:
   push:
@@ -9,8 +9,8 @@ on:
       - master
 
 jobs:
-  build:
-    runs-on: [ubuntu-latest, macos-latest, windows-latest]
+  test:
+    os: [ubuntu-latest, macos-latest, windows-latest]
 
     strategy:
       matrix:
