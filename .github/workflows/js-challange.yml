@@ -10,7 +10,7 @@ on:
 
 jobs:
   test:
-    os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
