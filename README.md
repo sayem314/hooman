@@ -1,4 +1,4 @@
-## hooman ![Build Status](https://img.shields.io/travis/sayem314/hooman.svg?style=flat-square&label=daily+builds)
+## hooman ![JS-Challange](https://github.com/sayem314/hooman/workflows/JS-Challange/badge.svg)
 
 HTTP interceptor using got to bypass Cloudflare DDOS protection / JavaScript challenge on Node.js
 
