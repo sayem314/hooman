@@ -2,7 +2,6 @@
 const got = require('got');
 const solveChallenge = require('./lib/core');
 const solveCaptcha = require('./lib/captcha');
-const delay = require('./lib/delay');
 const { CookieJar } = require('tough-cookie');
 const UserAgent = require('user-agents');
 
@@ -23,7 +22,7 @@ const instance = got.extend({
   http2: false, // http2 doesn't work well with proxies
   headers: {
     'accept-encoding': 'gzip, deflate',
-    'accept-language': 'en-US,en;q=0.9,bn;q=0.8',
+    'accept-language': 'en-US,en;q=0.5',
     'cache-control': 'max-age=0',
     'upgrade-insecure-requests': '1',
     'user-agent': new UserAgent().toString(), // Use random user agent between sessions
@@ -47,21 +46,9 @@ const instance = got.extend({
           response.body.includes('jschl-answer')
         ) {
           // Solve js challange
-          if (challengeInProgress[response.url.host] && !response.request.options.ignoreInProgress) {
-            while (challengeInProgress[response.url.host]) {
-              // console.log(`Waiting for captcha to be solved for ${response.url.host}`);
-              await delay(1000);
-            }
-            return instance({ ...response.request.options, cookieJar });
-          }
-
-          challengeInProgress[response.url.host] = true;
           const data = await solveChallenge(response.url, response.body);
           response.request.options.cloudflareRetry--;
-          return instance({ ...response.request.options, ...data, ignoreInProgress: true }).finally(() => {
-            console.log('deleted');
-            delete challengeInProgress[response.url.host];
-          });
+          return instance({ ...response.request.options, ...data });
         } else if (
           // Handle redirect issue for cloudflare
           response.statusCode === 404 &&
@@ -82,26 +69,19 @@ const instance = got.extend({
           response.body.includes('cf_captcha_kind')
         ) {
           // Solve g/hCaptcha
-          if (challengeInProgress[response.url.host] && !response.request.options.ignoreInProgress) {
-            while (challengeInProgress[response.url.host]) {
-              // console.log(`Waiting for captcha to be solved for ${response.url.host}`);
-              await delay(1000);
+          if (!challengeInProgress[response.url.host]) {
+            challengeInProgress[response.url.host] = true;
+            const captchaData = await solveCaptcha(response);
+            if (captchaData) {
+              return instance({
+                ...captchaData,
+                captchaRetry: response.request.options.captchaRetry - 1,
+                ignoreInProgress: true,
+              }).finally(() => {
+                delete challengeInProgress[response.url.host];
+              });
             }
-            return instance({ ...response.request.options, cookieJar });
           }
-
-          challengeInProgress[response.url.host] = true;
-          const captchaData = await solveCaptcha(response);
-          if (captchaData) {
-            return instance({
-              ...captchaData,
-              captchaRetry: response.request.options.captchaRetry - 1,
-              ignoreInProgress: true,
-            }).finally(() => {
-              delete challengeInProgress[response.url.host];
-            });
-          }
-          delete challengeInProgress[response.url.host];
         }
 
         return response;
