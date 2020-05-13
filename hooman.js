@@ -3,6 +3,7 @@ const got = require('got');
 const solveChallenge = require('./lib/core');
 const solveCaptcha = require('./lib/captcha');
 const delay = require('./lib/delay');
+const log = require('./lib/logging');
 const { CookieJar } = require('tough-cookie');
 const UserAgent = require('user-agents');
 
@@ -48,6 +49,7 @@ const instance = got.extend({
           response.body.includes('jschl-answer')
         ) {
           // Solve js challange
+          log.info('Solving js-challenge: ' + response.url);
           const data = await solveChallenge(response.url, response.body);
           response.request.options.cloudflareRetry--;
           return instance({ ...response.request.options, ...data });
@@ -72,24 +74,29 @@ const instance = got.extend({
         ) {
           // Solve g/hCaptcha
           // If there are captcha solving in progress for current domain do not request for solving
-          if (challengeInProgress[response.url.host]) {
-            while (challengeInProgress[response.url.host]) {
+          const host = response.request.options.url.host;
+          if (challengeInProgress[host]) {
+            log.info('Waiting for captcha to be solved: ' + host);
+            while (challengeInProgress[host]) {
               await delay(1000);
             }
+            log.info('Captcha were solved and waiting is over, refreshing: ' + host);
             return instance(response.request.options);
           }
 
-          challengeInProgress[response.url.host] = true;
+          challengeInProgress[host] = true;
           const captchaData = await solveCaptcha(response).finally(() => {
             setTimeout(() => {
-              if (challengeInProgress[response.url.host]) {
-                delete challengeInProgress[response.url.host];
+              if (challengeInProgress[host]) {
+                log.info('Clear challenge in progress: ' + host);
+                delete challengeInProgress[host];
               }
             }, 2000);
           });
 
           // Submit captcha data
           if (captchaData) {
+            log.info('Submit captcha: ' + captchaData.url);
             return instance({
               ...captchaData,
               captchaRetry: response.request.options.captchaRetry - 1,
