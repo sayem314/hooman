@@ -32,7 +32,12 @@ const instance = got.extend({
   }, // Mimic browser environment
   hooks: {
     beforeRequest: [
-      (options) => {
+      async (options) => {
+        // In case the host is in challenge progress wait
+        while (challengeInProgress[options.url.host]) {
+          await delay(1000);
+        }
+
         // Add required headers to mimic browser environment
         options.headers.host = options.url.host;
         options.headers.origin = options.url.origin;
