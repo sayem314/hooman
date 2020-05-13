@@ -27,3 +27,4 @@ jobs:
       - run: yarn test
         env:
           CI: true
+          HOOMAN_DEBUG: true
