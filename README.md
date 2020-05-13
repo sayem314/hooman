@@ -4,6 +4,8 @@ HTTP interceptor using got to bypass Cloudflare DDOS protection / JavaScript cha
 
 ![](https://github.com/sayem314/hooman/raw/master/screenshot.png)
 
+> hooman is not meant for spamming, please use it sanely.
+
 ## Install
 
 ```shell
@@ -68,7 +70,7 @@ console.log(response.body);
 
 > All you need to do is provide `captchaKey` and rest is done by hooman. It automatically detects if g/hCaptcha is present and need solving or can be solved. There are console.log print on hit as well.
 
-> Note that if you make multiple request at once only the first request will be served without error. This is so that you don't end up paying extra for captcha solving. If you would like to fetch more than one request at a time, first solve captcha and then make rest of your request after cookie is set.
+> Note that if you make multiple request to same site at once only the first request will be sent for captcha solving while other request will be hanged until captcha is solved. You might face multiple trigger to captcha, please monitor your usage. Best practice is to make a dummy request first and let hooman solve captcha and then process further requests.
 
 ###### Proxy
 
