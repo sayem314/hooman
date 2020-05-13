@@ -2,6 +2,7 @@
 const got = require('got');
 const solveChallenge = require('./lib/core');
 const solveCaptcha = require('./lib/captcha');
+const delay = require('./lib/delay');
 const { CookieJar } = require('tough-cookie');
 const UserAgent = require('user-agents');
 
@@ -71,20 +72,29 @@ const instance = got.extend({
         ) {
           // Solve g/hCaptcha
           // If there are captcha solving in progress for current domain do not request for solving
-          if (!challengeInProgress[response.url.host]) {
-            challengeInProgress[response.url.host] = true;
-            const captchaData = await solveCaptcha(response).finally(() => {
-              delete challengeInProgress[response.url.host];
-            });
-
-            // Submit captcha data
-            if (captchaData) {
-              return instance({
-                ...captchaData,
-                captchaRetry: response.request.options.captchaRetry - 1,
-                ignoreInProgress: true,
-              });
+          if (challengeInProgress[response.url.host]) {
+            while (challengeInProgress[response.url.host]) {
+              await delay(1000);
             }
+            return instance(response.request.options);
+          }
+
+          challengeInProgress[response.url.host] = true;
+          const captchaData = await solveCaptcha(response).finally(() => {
+            setTimeout(() => {
+              if (challengeInProgress[response.url.host]) {
+                delete challengeInProgress[response.url.host];
+              }
+            }, 2000);
+          });
+
+          // Submit captcha data
+          if (captchaData) {
+            return instance({
+              ...captchaData,
+              captchaRetry: response.request.options.captchaRetry - 1,
+              ignoreInProgress: true,
+            });
           }
         }
 
