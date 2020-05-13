@@ -49,8 +49,26 @@ const instance = got.extend({
           response.body.includes('jschl-answer')
         ) {
           // Solve js challange
+          const host = response.request.options.url.host;
+          if (challengeInProgress[host]) {
+            log.info('Waiting for js-challenge to be solved: ' + host);
+            while (challengeInProgress[host]) {
+              await delay(1000);
+            }
+            log.info('JS-Challenge were solved and waiting is over, refreshing: ' + host);
+            return instance(response.request.options);
+          }
+
           log.info('Solving js-challenge: ' + response.url);
-          const data = await solveChallenge(response.url, response.body);
+          challengeInProgress[host] = true;
+          const data = await solveChallenge(response.url, response.body).finally(() => {
+            setTimeout(() => {
+              if (challengeInProgress[host]) {
+                log.info('Clear js-challenge in progress: ' + host);
+                delete challengeInProgress[host];
+              }
+            }, 2000);
+          });
           response.request.options.cloudflareRetry--;
           return instance({ ...response.request.options, ...data });
         } else if (
@@ -88,7 +106,7 @@ const instance = got.extend({
           const captchaData = await solveCaptcha(response).finally(() => {
             setTimeout(() => {
               if (challengeInProgress[host]) {
-                log.info('Clear challenge in progress: ' + host);
+                log.info('Clear captcha in progress: ' + host);
                 delete challengeInProgress[host];
               }
             }, 2000);
