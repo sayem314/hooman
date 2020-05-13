@@ -2,7 +2,9 @@
 
 HTTP interceptor using got to bypass Cloudflare DDOS protection / JavaScript challenge on Node.js
 
-![](https://github.com/sayem314/hooman/raw/master/screenshot.png)
+|                           JS-Challange                            |                            hCaptcha                             |
+| :---------------------------------------------------------------: | :-------------------------------------------------------------: |
+| ![](https://github.com/sayem314/hooman/raw/master/screenshot.png) | ![](https://github.com/sayem314/hooman/raw/master/hCaptcha.png) |
 
 > hooman is not meant for spamming, please use it sanely.
 
