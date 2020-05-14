@@ -1,3 +1,8 @@
+### v1.2.3
+
+- Hooman was unable to bypass some websites which were using captcha and more strict firewall rules. It's fixed now.
+- You can now optionally set environment variable `HOOMAN_CAPTCHA_KEY` and `HOOMAN_RUCAPTCHA` to solve captchas.
+
 ### v1.2.2
 
 - Wait on captcha instead of throwing error. Fix [#11](https://github.com/sayem314/hooman/issues/11)
