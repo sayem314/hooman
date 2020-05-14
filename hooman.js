@@ -20,8 +20,8 @@ const instance = got.extend({
   cloudflareRetry: 5, // Prevent cloudflare loop
   notFoundRetry: 1, // Handle redirect issue
   captchaRetry: 1,
-  captchaKey: null,
-  rucaptcha: false,
+  captchaKey: process.env.HOOMAN_CAPTCHA_KEY,
+  rucaptcha: process.env.HOOMAN_RUCAPTCHA,
   http2: false, // http2 doesn't work well with proxies
   headers: {
     'accept-encoding': 'gzip, deflate',
