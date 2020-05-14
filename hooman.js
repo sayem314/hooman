@@ -98,7 +98,7 @@ const instance = got.extend({
           // Solve g/hCaptcha
           // If there are captcha solving in progress for current domain do not request for solving
           const host = response.request.options.url.host;
-          if (challengeInProgress[host]) {
+          if (challengeInProgress[host] && !response.request.options.ignoreInProgress) {
             log.info('Waiting for captcha to be solved: ' + host);
             while (challengeInProgress[host]) {
               await delay(1000);
@@ -121,6 +121,7 @@ const instance = got.extend({
           if (captchaData) {
             log.info('Submit captcha: ' + captchaData.url);
             return instance({
+              ...response.request.options,
               ...captchaData,
               captchaRetry: response.request.options.captchaRetry - 1,
               ignoreInProgress: true,
