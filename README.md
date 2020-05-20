@@ -63,7 +63,7 @@ hooman.stream(imageUrl).pipe(image);
 ###### Captcha
 
 ```js
-const response = await hooman.get('https://sayem.eu.org', {
+const response = await hooman.get(url, {
   captchaKey: '2captcha_or_rucaptcha_api_key',
   rucaptcha: true | false, // optional (default false)
 });
@@ -75,6 +75,21 @@ You can also set environment variable `HOOMAN_CAPTCHA_KEY` and `HOOMAN_RUCAPTCHA
 > All you need to do is provide `captchaKey` and rest is done by hooman. It automatically detects if g/hCaptcha is present and need solving or can be solved. There are console.log print on hit as well.
 
 > Note that if you make multiple request to same site at once only the first request will be sent for captcha solving while other request will be hanged until captcha is solved. You might face multiple trigger to captcha, please monitor your usage. Best practice is to make a dummy request first and let hooman solve captcha and then process further requests.
+
+###### Custom Captcha Handling
+
+```js
+const response = await hooman.get(url, {
+  // required
+  captchaKey: 'your_captcha_api_key',
+  // use with captchaKey, should return captcha response string or undefined
+  onCaptcha: ({ key, pageurl, sitekey, method }) => {
+    // solve captcha here
+    return h_captcha_response;
+  },
+});
+console.log(response.body);
+```
 
 ###### Proxy
 
