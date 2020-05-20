@@ -19,7 +19,8 @@ const instance = got.extend({
   }, // Do not retry 503, we will handle it
   cloudflareRetry: 5, // Prevent cloudflare loop
   notFoundRetry: 1, // Handle redirect issue
-  captchaRetry: 1,
+  captchaRetry: 1, // Max retry on captcha
+  onCaptcha: null, // Custom function to handle captcha
   captchaKey: process.env.HOOMAN_CAPTCHA_KEY,
   rucaptcha: process.env.HOOMAN_RUCAPTCHA,
   http2: false, // http2 doesn't work well with proxies
