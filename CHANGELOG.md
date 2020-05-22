@@ -1,3 +1,8 @@
+### v1.2.4
+
+- Added custom captcha handler
+- Replaced `vm2` with native `vm` to support electron [#16](https://github.com/sayem314/hooman/issues/16)
+
 ### v1.2.3
 
 - Hooman was unable to bypass some websites which were using captcha and more strict firewall rules. It's fixed now.
