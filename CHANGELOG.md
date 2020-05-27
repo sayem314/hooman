@@ -1,3 +1,7 @@
+### v1.2.5
+
+- Fixed new challenge [#18](https://github.com/sayem314/hooman/issues/18)
+
 ### v1.2.4
 
 - Added custom captcha handler
