@@ -1,3 +1,7 @@
+### v1.2.6
+
+- Fixed issue related with v1 challenge
+
 ### v1.2.5
 
 - Fixed new challenge [#18](https://github.com/sayem314/hooman/issues/18)
