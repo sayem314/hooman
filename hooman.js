@@ -52,7 +52,8 @@ const instance = got.extend({
           response.statusCode === 503 &&
           response.headers.server === 'cloudflare' &&
           response.request.options.cloudflareRetry > 0 &&
-          response.body.includes('jschl-answer')
+          response.body.includes('jschl-answer') &&
+          response.body.includes('var s')
         ) {
           // Solve js challange
           const host = response.request.options.url.host;
