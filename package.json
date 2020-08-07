@@ -41,13 +41,13 @@
   },
   "homepage": "https://github.com/sayem314/hooman#readme",
   "dependencies": {
-    "jsdom": "^16.2.2",
+    "jsdom": "^16.3.0",
     "tough-cookie": "^4.0.0",
     "user-agents": "^1.0.559"
   },
   "devDependencies": {
-    "eslint": "^7.0.0",
-    "mocha": "^7.1.2"
+    "eslint": "^7.6.0",
+    "mocha": "^8.1.1"
   },
   "peerDependencies": {
     "got": ">=11.0.0"
