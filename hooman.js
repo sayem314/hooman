@@ -1,14 +1,19 @@
 'use strict';
+require('./lib/outgoing_message');
 const got = require('got');
 const solveChallenge = require('./lib/core');
 const solveCaptcha = require('./lib/captcha');
 const delay = require('./lib/delay');
 const log = require('./lib/logging');
 const { CookieJar } = require('tough-cookie');
+const SSL_OP_ALL = require('constants').SSL_OP_ALL;
 const UserAgent = require('user-agents');
+const userAgentSettings = require('./lib/user_agent_settings');
 
 const cookieJar = new CookieJar(); // Automatically parse and store cookies
 const challengeInProgress = {};
+
+const SIGNATURE_ALGORITHMS = 'ecdsa_secp256r1_sha256:ecdsa_secp384r1_sha384:ecdsa_secp521r1_sha512:ed25519:ed448:rsa_pss_pss_sha256:rsa_pss_pss_sha384:rsa_pss_pss_sha512:rsa_pss_rsae_sha256:rsa_pss_rsae_sha384:rsa_pss_rsae_sha512:rsa_pkcs1_sha256:rsa_pkcs1_sha384:rsa_pkcs1_sha512:ECDSA+SHA224:RSA+SHA224:DSA+SHA224:DSA+SHA256:DSA+SHA384:DSA+SHA512';
 
 // Got instance to handle cloudflare bypass
 const instance = got.extend({
@@ -24,19 +29,30 @@ const instance = got.extend({
   captchaKey: process.env.HOOMAN_CAPTCHA_KEY,
   rucaptcha: process.env.HOOMAN_RUCAPTCHA,
   http2: false, // http2 doesn't work well with proxies
-  headers: {
-    'accept-encoding': 'gzip, deflate',
-    'accept-language': 'en-US,en;q=0.5',
-    'cache-control': 'max-age=0',
-    'upgrade-insecure-requests': '1',
-    'user-agent': new UserAgent().toString(), // Use random user agent between sessions
-  }, // Mimic browser environment
+  honorCipherOrder: true,
+  maxVersion: 'TLSv1.3',
+  sigalgs: SIGNATURE_ALGORITHMS,
+  ALPNProtocols: ['http/1.1'],
+  ecdhCurve: 'prime256v1',
+  secureOptions: SSL_OP_ALL,
   hooks: {
     beforeRequest: [
       async (options) => {
         // In case the host is in challenge progress wait
         while (challengeInProgress[options.url.host]) {
           await delay(1000);
+        }
+
+        if(options.headers['user-agent'] === got.defaults.options.headers['user-agent']) {
+          const userAgent = new UserAgent(/Firefox|Chrome/);
+          options.headers['user-agent'] = userAgent.toString();
+        }
+
+        const { headers, cipherSuite } = userAgentSettings(options.headers['user-agent']);
+        options.headers = got.mergeOptions({headers: options.headers}, {headers}).headers;
+
+        if(!options.ciphers) {
+          options.ciphers = cipherSuite.join(':');
         }
 
         // Add required headers to mimic browser environment
