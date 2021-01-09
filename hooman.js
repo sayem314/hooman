@@ -33,7 +33,7 @@ const userAgentSsl = got.extend(
             }
           }
           catch(e) {
-            console.warn('Unable to set user agent ciphers: ' + e);
+            log.warn('Unable to set user agent ciphers: ' + e);
           }
         },
       ]
@@ -63,7 +63,7 @@ const userAgentHeaders = got.extend({
           options.headers = got.mergeOptions({ headers: options.headers }, { headers }).headers;
         }
         catch(e) {
-          console.warn('Unable to set user agent headers: ' + e);
+          log.warn('Unable to set user agent headers: ' + e);
         }
 
         // Add required headers to mimic browser environment
@@ -217,7 +217,7 @@ if(nodeMajorVersion >= 12) {
   instances.push(userAgentSsl);
 }
 else {
-  console.warn('User agent SSL emulation is only available in Node v12+');
+  log.warn('User agent SSL emulation is only available in Node v12+');
 }
 // header capitalization should come last, because it changes headers from an object to an array
 instances.push(capitalizedHeaders);
