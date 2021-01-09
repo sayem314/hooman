@@ -5,13 +5,99 @@ const solveCaptcha = require('./lib/captcha');
 const delay = require('./lib/delay');
 const log = require('./lib/logging');
 const { CookieJar } = require('tough-cookie');
+const SSL_OP_ALL = require('constants').SSL_OP_ALL;
 const UserAgent = require('user-agents');
+const userAgentSettings = require('./lib/user_agent_settings');
 
 const cookieJar = new CookieJar(); // Automatically parse and store cookies
 const challengeInProgress = {};
 
+const SIGNATURE_ALGORITHMS = 'ecdsa_secp256r1_sha256:ecdsa_secp384r1_sha384:ecdsa_secp521r1_sha512:ed25519:ed448:rsa_pss_pss_sha256:rsa_pss_pss_sha384:rsa_pss_pss_sha512:rsa_pss_rsae_sha256:rsa_pss_rsae_sha384:rsa_pss_rsae_sha512:rsa_pkcs1_sha256:rsa_pkcs1_sha384:rsa_pkcs1_sha512:ECDSA+SHA224:RSA+SHA224:DSA+SHA224:DSA+SHA256:DSA+SHA384:DSA+SHA512';
+
+const userAgentSsl = got.extend(
+  {
+    honorCipherOrder: true,
+    maxVersion: 'TLSv1.3',
+    sigalgs: SIGNATURE_ALGORITHMS,
+    ALPNProtocols: ['http/1.1'],
+    ecdhCurve: 'prime256v1',
+    secureOptions: SSL_OP_ALL,
+    hooks: {
+      beforeRequest: [
+        async (options) => {
+          try {
+            const { cipherSuite } = userAgentSettings(options.headers['user-agent']);
+
+            if (!options.ciphers) {
+              options.ciphers = cipherSuite.join(':');
+            }
+          }
+          catch(e) {
+            log.warn('Unable to set user agent ciphers: ' + e);
+          }
+        },
+      ]
+    }
+  }
+);
+
+const ensureUserAgent = got.extend({
+  hooks: {
+    beforeRequest: [
+      async (options) => {
+        if (options.headers['user-agent'] === got.defaults.options.headers['user-agent']) {
+          const userAgent = new UserAgent(/Firefox|Chrome/);
+          options.headers['user-agent'] = userAgent.toString();
+        }
+      }
+    ]
+  }
+});
+
+const userAgentHeaders = got.extend({
+  hooks: {
+    beforeRequest: [
+      async (options) => {
+        try {
+          const { headers } = userAgentSettings(options.headers['user-agent']);
+          options.headers = got.mergeOptions({ headers: options.headers }, { headers }).headers;
+        }
+        catch(e) {
+          log.warn('Unable to set user agent headers: ' + e);
+        }
+
+        // Add required headers to mimic browser environment
+        options.headers.host = options.url.host;
+        options.headers.origin = options.url.origin;
+        options.headers.referer = options.url.href;
+      },
+    ]
+  }
+});
+
+const capitalizedHeaders = got.extend({
+  hooks: {
+    beforeRequest: [
+      async (options) => {
+        options.headers = Object.keys(options.headers).reduce((result, lowerCaseKey) => {
+          const value = options.headers[lowerCaseKey];
+          const words = lowerCaseKey.split('-');
+          const upperCaseKey = words.map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('-');
+          const header = [upperCaseKey, value];
+          if(upperCaseKey === 'Host') {
+            result.unshift(header);
+          } else {
+            result.push(header);
+          }
+          return result;
+        }, []);
+      },
+    ]
+  }
+});
+
 // Got instance to handle cloudflare bypass
-const instance = got.extend({
+const captcha = got.extend({
   cookieJar,
   retry: {
     limit: 2,
@@ -24,13 +110,6 @@ const instance = got.extend({
   captchaKey: process.env.HOOMAN_CAPTCHA_KEY,
   rucaptcha: process.env.HOOMAN_RUCAPTCHA,
   http2: false, // http2 doesn't work well with proxies
-  headers: {
-    'accept-encoding': 'gzip, deflate',
-    'accept-language': 'en-US,en;q=0.5',
-    'cache-control': 'max-age=0',
-    'upgrade-insecure-requests': '1',
-    'user-agent': new UserAgent().toString(), // Use random user agent between sessions
-  }, // Mimic browser environment
   hooks: {
     beforeRequest: [
       async (options) => {
@@ -38,11 +117,6 @@ const instance = got.extend({
         while (challengeInProgress[options.url.host]) {
           await delay(1000);
         }
-
-        // Add required headers to mimic browser environment
-        options.headers.host = options.url.host;
-        options.headers.origin = options.url.origin;
-        options.headers.referer = options.url.href;
       },
     ],
     afterResponse: [
@@ -137,5 +211,18 @@ const instance = got.extend({
   },
   mutableDefaults: true, // Defines if config can be changed later
 });
+
+const nodeMajorVersion = Number(process.versions.node.split('.')[0]);
+const instances = [captcha, ensureUserAgent, userAgentHeaders];
+if(nodeMajorVersion >= 12) {
+  instances.push(userAgentSsl);
+}
+else {
+  log.warn('User agent SSL emulation is only available in Node v12+');
+}
+// header capitalization should come last, because it changes headers from an object to an array
+instances.push(capitalizedHeaders);
+
+const instance = got.extend(...instances);
 
 module.exports = instance;
