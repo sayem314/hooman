@@ -1,3 +1,12 @@
+# 2.0.0
+
+- Stack modernization release. hooman is now a native ESM package (`import hooman from 'hooman'`), drop-in `require()` is gone along with CommonJS.
+- `got` peer dependency bumped to `>=16` (ESM only, requires Node >= 22).
+- Custom options (`cloudflareRetry`, `notFoundRetry`, `captchaRetry`, `onCaptcha`, `captchaKey`, `rucaptcha`) moved into got's `context` object, because got v12+ rejects unknown top-level options. Pass them per request as `{ context: { captchaKey: '...' } }`.
+- Dependencies refreshed: jsdom 30, tough-cookie 6, user-agents 2. Dev tooling: eslint 10 flat config, mocha 12.
+- Node >= 22 required. CI matrix updated accordingly.
+- Real-world challenge tests now detect whether the target still serves the legacy IUAM format and skip with a reason when it does not (Cloudflare retired it), an always-run plain-page test covers the happy path.
+
 ### v1.2.6
 
 - Fixed issue related with v1 challenge
@@ -28,42 +37,3 @@
 - Fixed [#9](https://github.com/sayem314/hooman/issues/9)
 - Fixed proxy issue [#10](https://github.com/sayem314/hooman/issues/11)
 - Added support for rucaptcha
-- Refactored captcha code
-
-### v1.2.0
-
-- Refactored code
-- Added 2captcha support
-
-### v1.1.1
-
-- Faster and better sandbox code execution
-- Added the ability to specify custom retry limit for Cloudflare challenges
-
-```js
-// Example
-const { body } = await got(url, {
-  cloudflareRetry: 8, // default 5
-});
-```
-
-### v1.1.1
-
-- Faster and better sandbox code execution
-- Added the ability to specify custom retry limit for Cloudflare challenges
-
-```js
-// Example
-const { body } = await got(url, {
-  cloudflareRetry: 8, // default 5
-});
-```
-
-### v1.1.0
-
-- Added vm2 to run code safely
-- got as peer dependencies
-
-### v1.0.0
-
-- Initial commit

@@ -2,6 +2,8 @@
 
 HTTP interceptor using got to bypass Cloudflare DDOS protection / JavaScript challenge on Node.js
 
+> hooman v2 is a native ESM package and requires Node.js >= 22 with got >= 16. For the legacy CommonJS build see the [v1 branch](https://github.com/sayem314/hooman/tree/v1).
+
 |                           JS-Challange                            |                            hCaptcha                             |
 | :---------------------------------------------------------------: | :-------------------------------------------------------------: |
 | ![](https://github.com/sayem314/hooman/raw/master/screenshot.png) | ![](https://github.com/sayem314/hooman/raw/master/hCaptcha.png) |
@@ -15,14 +17,14 @@ HTTP interceptor using got to bypass Cloudflare DDOS protection / JavaScript cha
 yarn add hooman got
 ```
 
-> got is peer-dependency
+> got is peer-dependency, version >= 16 required
 
 ## Usage Example
 
 ###### GET HTML
 
 ```js
-const hooman = require('hooman');
+import hooman from 'hooman';
 
 (async () => {
   try {
@@ -64,8 +66,10 @@ hooman.stream(imageUrl).pipe(image);
 
 ```js
 const response = await hooman.get(url, {
-  captchaKey: '2captcha_or_rucaptcha_api_key',
-  rucaptcha: true | false, // optional (default false)
+  context: {
+    captchaKey: '2captcha_or_rucaptcha_api_key',
+    rucaptcha: true | false, // optional (default false)
+  },
 });
 console.log(response.body);
 ```
@@ -74,18 +78,22 @@ You can also set environment variable `HOOMAN_CAPTCHA_KEY` and `HOOMAN_RUCAPTCHA
 
 > All you need to do is provide `captchaKey` and rest is done by hooman. It automatically detects if g/hCaptcha is present and need solving or can be solved. There are console.log print on hit as well.
 
+> hooman specific options (`cloudflareRetry`, `notFoundRetry`, `captchaRetry`, `onCaptcha`, `captchaKey`, `rucaptcha`) live under got's `context` object now, got v12+ rejects unknown top-level options.
+
 > Note that if you make multiple request to same site at once only the first request will be sent for captcha solving while other request will be hanged until captcha is solved. You might face multiple trigger to captcha, please monitor your usage. Best practice is to make a dummy request first and let hooman solve captcha and then process further requests.
 
 ###### Custom Captcha Handling
 
 ```js
 const response = await hooman.get(url, {
-  // required
-  captchaKey: 'your_captcha_api_key',
-  // use with captchaKey, should return captcha response string or undefined
-  onCaptcha: ({ key, pageurl, sitekey, method }) => {
-    // solve captcha here
-    return h_captcha_response;
+  context: {
+    // required
+    captchaKey: 'your_captcha_api_key',
+    // use with captchaKey, should return captcha response string or undefined
+    onCaptcha: ({ key, pageurl, sitekey, method }) => {
+      // solve captcha here
+      return h_captcha_response;
+    },
   },
 });
 console.log(response.body);
@@ -94,7 +102,7 @@ console.log(response.body);
 ###### Proxy
 
 ```js
-const HttpsProxyAgent = require('https-proxy-agent');
+import HttpsProxyAgent from 'https-proxy-agent';
 
 const proxy = new HttpsProxyAgent('http://127.0.0.1:3128');
 
