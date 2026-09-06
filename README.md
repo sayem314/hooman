@@ -2,7 +2,7 @@
 
 HTTP interceptor using got to bypass Cloudflare DDOS protection / JavaScript challenge on Node.js
 
-> hooman v2 is a native ESM package and requires Node.js >= 22 with got >= 16. For the legacy CommonJS build see the [v1 branch](https://github.com/sayem314/hooman/tree/v1).
+> hooman v2 is a native ESM package and requires Node.js >= 24 (current LTS) with got >= 16. For the legacy CommonJS build see the [v1 branch](https://github.com/sayem314/hooman/tree/v1).
 
 |                           JS-Challange                            |                            hCaptcha                             |
 | :---------------------------------------------------------------: | :-------------------------------------------------------------: |

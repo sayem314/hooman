@@ -12,7 +12,7 @@
     "test": "npm run lint && mocha tests/**/*"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   },
   "repository": {
     "type": "git",
