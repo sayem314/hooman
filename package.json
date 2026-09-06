@@ -1,6 +1,6 @@
 {
   "name": "hooman",
-  "version": "1.2.6",
+  "version": "2.0.0",
   "description": "http interceptor to hoomanize cloudflare requests",
   "type": "module",
   "main": "hooman.js",
@@ -49,17 +49,17 @@
   },
   "homepage": "https://github.com/sayem314/hooman#readme",
   "dependencies": {
-    "jsdom": "^30.0.1",
-    "tough-cookie": "^6.0.0",
-    "user-agents": "^2.1.175"
+    "jsdom": "30.0.1",
+    "tough-cookie": "6.0.2",
+    "user-agents": "2.1.175"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "@types/node": "^26.4.1",
-    "eslint": "^10.10.0",
-    "globals": "^17.12.0",
-    "mocha": "^12.0.0",
-    "typescript": "^7.0.2"
+    "@eslint/js": "10.0.1",
+    "@types/node": "26.4.1",
+    "eslint": "10.10.0",
+    "globals": "17.12.0",
+    "mocha": "12.0.0",
+    "typescript": "7.0.2"
   },
   "peerDependencies": {
     "got": ">=16.0.0"
