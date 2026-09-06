@@ -1,4 +1,4 @@
-# 2.0.0
+# Unreleased
 
 - Stack modernization release. hooman is now a native ESM package (`import hooman from 'hooman'`), drop-in `require()` is gone along with CommonJS.
 - `got` peer dependency bumped to `>=16` (ESM only, requires Node >= 24).
