@@ -1,10 +1,10 @@
 # Unreleased
 
 - Stack modernization release. hooman is now a native ESM package (`import hooman from 'hooman'`), drop-in `require()` is gone along with CommonJS.
-- `got` peer dependency bumped to `>=16` (ESM only, requires Node >= 24).
+- `got` peer dependency bumped to `>=16` (ESM only, requires Node >= 22).
 - Custom options (`cloudflareRetry`, `notFoundRetry`, `captchaRetry`, `onCaptcha`, `captchaKey`, `rucaptcha`) moved into got's `context` object, because got v12+ rejects unknown top-level options. Pass them per request as `{ context: { captchaKey: '...' } }`.
 - Dependencies refreshed: jsdom 30, tough-cookie 6, user-agents 2. Dev tooling: eslint 10 flat config, mocha 12.
-- Node >= 24 required (current LTS line), CI matrix 24 and 26.
+- Node >= 22 supported (jsdom 30 needs 22.22.2 or newer, satisfied by the current 22.x line), CI matrix runs 24 and 26.
 - Real-world challenge tests now detect whether the target still serves the legacy IUAM format and skip with a reason when it does not (Cloudflare retired it), an always-run plain-page test covers the happy path.
 
 ### v1.2.6
