@@ -1,0 +1,12 @@
+{
+	"compilerOptions": {
+		"noEmit": true,
+		"strict": true,
+		"module": "nodenext",
+		"moduleResolution": "nodenext",
+		"target": "es2022",
+		"skipLibCheck": true,
+		"types": ["node"]
+	},
+	"include": ["tests/types"]
+}
